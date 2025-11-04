@@ -3,7 +3,8 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include "map.h"
+#include <sstream>
+#include <fstream>
 using namespace std;
 
 // Should be a function that takes in the dates desired by the user and returns the two temp values.
