@@ -1,7 +1,8 @@
-//Hashmap Implemenation
 // Hashmap implemenation
 #include <iostream>
 #include <vector>
+#include <sstring>
+
 using namespace std;
 
 //Making a HashMap class with template because I want to make a nested hashmap (4 times)
