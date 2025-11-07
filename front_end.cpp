@@ -9,3 +9,6 @@ void LoadFont(sf::Font& font, const string& fontFile) {
 string getStation(string station) {
     return station;
 }
+int getYear(int year) {
+    return year;
+}
