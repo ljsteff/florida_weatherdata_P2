@@ -1,7 +1,8 @@
-// Hashmap implemenation
+//Hashmap implementation
 #include <iostream>
 #include <vector>
-#include <sstring>
+#include <algorithm>
+#include <sstream>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ struct Node{
     Node* next;
 };
 
+template <typename First, typename Second>
 //I hope this works with separate chaining for the innermost hashmap to insert all temperatures per day
 class HashMap{
     //each station/year/month/day is a separate key
