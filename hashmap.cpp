@@ -165,7 +165,7 @@ pair<int, int> averageDaily(string station, int year, int month, int day, bool i
     return 0;
   }
   if (!isCelsius){
-    return make_pair(day, (temps->average())*9/5 + 32);
+    return make_pair(day, (temps->average()-32)*5/9);
   }
   return make_pair(day, temps->average());
 }
