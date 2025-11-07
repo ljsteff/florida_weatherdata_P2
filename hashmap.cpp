@@ -147,7 +147,7 @@ void insertTemperatures(string station, int year, int month, int day, int temp){
 }
 
 
-pair<int, int> averageDaily(string station, int year, int month, int day, bool isCelsius){
+pair<int, int> averageDaily(string station, int year, int month, int day, bool isFahrenheit){
   hashYear* yearMap = stations.find(station);
   if (!yearMap){
     return 0;
@@ -164,13 +164,13 @@ pair<int, int> averageDaily(string station, int year, int month, int day, bool i
   if (!temps){
     return 0;
   }
-  if (!isCelsius){
+  if (!isFahrenheit){
     return make_pair(day, (temps->average()-32)*5/9);
   }
   return make_pair(day, temps->average());
 }
 
-vector<int, pair<int, int>> weatherMapCelsius(const string &metfile, bool isCelsius){
+vector<int, pair<int, int>> weatherMap(const string &metfile, bool isFahrenheit){
   // Parsing logic
   vector<int, pair<int, int>> allTemps;
   ifstream file(metFile);
