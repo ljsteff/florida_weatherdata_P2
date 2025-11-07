@@ -106,3 +106,49 @@ vector<pair<int,string>> outputFromMap(map<string, map<int,string>> dataMap, int
   return outputFahrenheit;
 }
 
+vector<pair<int,string>> averageCalc(vector<pair<int,string>> input){
+  // Takes the average of all the datapoints for each day and leaves it in the pair
+    vector<pair<int,string>> output;
+    string store = to_string(input[0].first).substr(0,8);
+    vector<int> temp;
+    for (auto it = input.begin(); it != input.end(); it++) {
+    	int avg = 0;
+    	string day = to_string(it->first).substr(0,8);
+    	if (store == day) {
+    		temp.push_back(stoi(it->second));
+     	}
+    	else {
+    		for (int i = 0 ; i < temp.size(); i++) {
+    			avg += temp[i];
+    		}
+    	avg /= temp.size();
+    	output.push_back(make_pair(stoi(store), to_string(avg)));
+	 	temp.clear();
+    	temp.push_back(stoi(it->second));
+    	store = day;
+    	}
+	}
+	if(!temp.empty()) {
+    	int average = 0;
+    	for(int j = 0; j < temp.size(); j++) {
+        average += temp[j];
+    	}
+      average /= temp.size();
+      output.push_back(make_pair(stoi(store), to_string(average)));
+    }
+    return output;
+}
+
+vector<pair<int,string>> celsiusCalc(vector<pair<int,string>> input){
+  // Translating all temperture values into Celsius from Fahrenheit
+  vector<pair<int,string>> output;
+  for (auto it = input.begin(); it != input.end(); it++) {
+    int newTemp = (stoi(it->second)-32)*(5/9);
+    pair<int, string> newPair;
+    newPair = make_pair(it->first, newTemp);
+    output.push_back(newPair);
+  }
+  return output;
+}
+
+
