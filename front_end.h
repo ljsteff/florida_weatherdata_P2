@@ -1,7 +1,6 @@
 #pragma once
 #include <sstream>
 #include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
 #include <iostream>
 using namespace std;
 
@@ -11,5 +10,7 @@ public:
     unsigned int height = 900;
     string station;
 };
+
 void LoadFont(sf::Font& font, const string& fontFile);
 string getStation(string station);
+int getYear(int year);
