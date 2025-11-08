@@ -24,7 +24,30 @@ class HashMap{
     vector<Node<First, Second>*> table;
     int size;
     int hashFunction(First first){
-        return std::hash<First>{}(first) % size; //I want each index to be a new day
+        //return std::hash<First>{}(first) % size; //I want each index to be a new day
+        if constexpr (std::is_same_v<First, std::string>) {
+            int hash = 0;
+            for (char c : first) hash += c;
+            return hash % size;
+        }
+        else if constexpr (std::is_same_v<First, int>) {
+            if (size == 16) {
+                return first - 2010;
+            }
+            else if (size == 12) {
+                return first - 1;
+            }
+            else if (size == 31) {
+                return first - 1;
+            }
+            else {
+                return first % size;
+            }
+        }
+        else {
+            // generic fallback
+            return first % size;
+        }
     }
 public:
     HashMap(int size) : table(size, nullptr){} //initialize all elements to nullptr
