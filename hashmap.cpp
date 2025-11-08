@@ -18,7 +18,7 @@ hashStation stations(113); //there are 113 stations in Florida
 
 
 // Helper to get the value of the date/time without dashes or colons:
-string getTime(string selectedYear) {
+string getTimeString(string selectedYear) {
   string year;
   istringstream in(selectedYear);
 
@@ -112,7 +112,7 @@ vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yea
       temp.push_back(point);
     }
     //inserting everything while trying to
-    string timeStr = getTime(temp[1]);
+    string timeStr = getTimeString(temp[1]);
     int year = stoi(timeStr.substr(0, 4));
     int month = stoi(timeStr.substr(4, 2));
     int day = stoi(timeStr.substr(6, 2));
