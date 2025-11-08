@@ -23,7 +23,7 @@ class HashMap{
     vector<Node<First, Second>*> table;
     int size;
     int hashFunction(First first){
-      return first % size; //I want each index to be a new day
+      return std::hash<First>{}(first) % size; //I want each index to be a new day
     }
     public:
       HashMap(int size) : table(size, nullptr){} //initialize all elements to nullptr
@@ -56,13 +56,6 @@ class HashMap{
       }
 };
 
-//making each hashmap
-using hashDay = HashMap<int, Temperature>;
-using hashMonth = HashMap<int, hashDay>;
-using hashYear = HashMap<int, hashMonth>;
-using hashStation = HashMap<int, hashYear>;
-hashStation stations(113); //there are 113 stations in Florida
-
 //Making a special hashmap for temperatures because it should allow duplicate values
 struct NodeTemp{
     int temp;
@@ -72,10 +65,10 @@ struct NodeTemp{
 
 class Temperature{
     public:
-      NodeTemp* first = nullptr;
+      NodeTemp* head = nullptr;
 
-      void insertTemp(NodeTemp* first, NodeTemp* second){
-        NodeTemp* newNode = new NodeTemp(first->temp);
+      void insertTemp(int t){
+        NodeTemp* newNode = new NodeTemp(t);
         newNode->next = head;
         head = newNode;
       }
@@ -92,12 +85,21 @@ class Temperature{
         if (count == 0){
           return 0;
         }
-        return sum / count;
+        return sum/count;
       }
 };
 
+//making each hashmap
+using hashDay = HashMap<int, Temperature>;
+using hashMonth = HashMap<int, hashDay>;
+using hashYear = HashMap<int, hashMonth>;
+using hashStation = HashMap<string, hashYear>;
+hashStation stations(113); //there are 113 stations in Florida
+
+
+
 // Helper to get the value of the date/time without dashes or colons:
-int getTime(string selectedYear) {
+string getTime(string selectedYear) {
   string year;
   istringstream in(selectedYear);
 
@@ -123,46 +125,45 @@ int getTime(string selectedYear) {
 void insertTemperatures(string station, int year, int month, int day, int temp){
   hashYear* yearMap = stations.find(station);
   if (!yearMap){
-    stations.insert(station, yearMap(14); //set tablesize for yearMap to 14 because we have 14 years worth of info
+    stations.insert(station, hashYear(14)); //set tablesize for yearMap to 14 because we have 14 years worth of info
+    yearMap = stations.find(station);
   }
   hashMonth* monthMap = yearMap->find(year);
   if (!monthMap){
-    yearMap->insert(year, monthMap(12));
-    monthMap = yearMap->find(month);
+    yearMap->insert(year, hashMonth(12));
+    monthMap = yearMap->find(year);
   }
-  hashDay* dayMap = yearMap->find(month);
+  hashDay* dayMap = monthMap->find(month);
   if (!dayMap){
-    monthMap->insert(month, dayMap(31));
-    dayMap = monthMap->find(day);
+    monthMap->insert(month, hashDay(31));
+    dayMap = monthMap->find(month);
   }
-  Temperature* temps = dayMap->find(temp);
+  Temperature* temps = dayMap->find(day);
   if (!temps){
-    return 0;
+    dayMap->insert(day, Temperature());
+    temps = dayMap->find(day);
   }
 
-  dayMap.insert(day, temp);
-  monthMap.insert(month, dayMap);
-  yearMap.insert(year, monthMap);
-  stationMap.insert(station, yearMap);
+  temps->insertTemp(temp);
 }
 
 
-pair<int, int> averageDaily(string station, int year, int month, int day, bool isFahrenheit){
+pair<int, float> averageDaily(string station, int year, int month, int day, bool isFahrenheit){
   hashYear* yearMap = stations.find(station);
   if (!yearMap){
-    return 0;
+    return {day, 0.0};
   }
-  hashMonth* monthMap = yearMap->find(month);
+  hashMonth* monthMap = yearMap->find(year);
   if (!monthMap){
-    return 0;
+    return {day, 0.0};
   }
-  hashDay* dayMap = yearMap->find(day);
+  hashDay* dayMap = monthMap->find(month);
   if (!dayMap){
-    return 0;
+    return {day, 0.0};
   }
-  Temperature* temps = dayMap->find(temp);
+  Temperature* temps = dayMap->find(day);
   if (!temps){
-    return 0;
+    return {day, 0.0};
   }
   if (!isFahrenheit){
     return make_pair(day, (temps->average()-32)*5/9);
@@ -170,13 +171,14 @@ pair<int, int> averageDaily(string station, int year, int month, int day, bool i
   return make_pair(day, temps->average());
 }
 
-vector<int, pair<int, int>> weatherMap(const string &metfile, bool isFahrenheit){
+//Front end implementer only has to use this function
+vector<pair<int, float>> weatherMap(const string &metfile, bool isFahrenheit){
   // Parsing logic
-  vector<int, pair<int, int>> allTemps;
-  ifstream file(metFile);
+  vector<pair<int, float>> allTemps;
+  ifstream file(metfile);
   string line;
   if(!file.is_open()) {
-    cout << metFile << " failure" << endl;
+    cout << metfile << " failure" << endl;
   }
   // Skip header
   getline(file,line);
@@ -191,9 +193,8 @@ vector<int, pair<int, int>> weatherMap(const string &metfile, bool isFahrenheit)
       temp.push_back(point);
     }
     //inserting everything while trying to
-    insertTemperatures(temp[0], getTime(temp[1]).substr(0,3), getTime(temp[1]).substr(4,5), getTime(temp[1]).substr(6,7), temp[2]);
-    allTemps.push_back(averageDaily(temp[0], getTime(temp[1]).substr(0,3), getTime(temp[1]).substr(4,5), getTime(temp[1]).substr(6,7), temp[2], isCelsius);
+    insertTemperatures(temp[0], stoi(getTime(temp[1]).substr(0,4)), stoi(getTime(temp[1]).substr(4,2)), stoi(getTime(temp[1]).substr(6,2)), stoi(temp[2]));
+    allTemps.push_back(averageDaily(temp[0], stoi(getTime(temp[1]).substr(0,4)), stoi(getTime(temp[1]).substr(4,2)), stoi(getTime(temp[1]).substr(6,2)), stoi(temp[2]), isFahrenheit);
   }
   return allTemps;
 }
-
