@@ -92,8 +92,8 @@ public:
 
 string getTime(string selectedYear);
 void insertTemperatures(string station, int year, int month, int day, int temp);
-pair<int, float> averageDaily(string station, int year, int month, int day, bool isFahrenheit);
-vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isFahrenheit);
+pair<int, float> averageDaily(string station, int year, int month, int day, bool isCelsius);
+vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius);
 
 
 #endif //HASHMAP_H
