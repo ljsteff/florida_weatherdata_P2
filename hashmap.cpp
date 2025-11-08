@@ -111,11 +111,19 @@ vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yea
     while (getline(iss, point, ',')) {
       temp.push_back(point);
     }
-    //inserting everything while trying to
+
+    if (temp.size() < 3) continue; // Skip malformed lines
+    if (temp[1].empty() || temp[2].empty()){
+      continue;
+    }
     string timeStr = getTimeString(temp[1]);
     int year = stoi(timeStr.substr(0, 4));
     int month = stoi(timeStr.substr(4, 2));
     int day = stoi(timeStr.substr(6, 2));
+
+    if (temp[2].empty() || temp[2][0] == 'M'){
+      continue;
+    }
     int temperature = stoi(temp[2]);
     if (year < yearFrom || year > yearTo) {
       continue;
