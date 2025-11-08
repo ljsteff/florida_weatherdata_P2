@@ -16,7 +16,6 @@ using hashStation = HashMap<string, hashYear>;
 hashStation stations(113); //there are 113 stations in Florida
 
 
-
 // Helper to get the value of the date/time without dashes or colons:
 string getTimeString(string selectedYear) {
   string year;
@@ -41,7 +40,7 @@ string getTimeString(string selectedYear) {
 }
 
 //Helper function for inserting everything
-void insertTemperatures(string station, int year, int month, int day, int temp){
+void insertTemperatures(string station, int year, int month, int day, float temp){
   hashYear* yearMap = stations.find(station);
   if (!yearMap){
     stations.insert(station, hashYear(14)); //set tablesize for yearMap to 14 because we have 14 years worth of info
@@ -94,6 +93,7 @@ pair<int, float> averageDaily(string station, int year, int month, int day, bool
 vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius){
   // Parsing logic
   vector<pair<int, float>> allTemps;
+  set<tuple<string, int, int, int>> seenDays;
   ifstream file(metfile);
   string line;
   if(!file.is_open()) {
@@ -111,18 +111,31 @@ vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yea
     while (getline(iss, point, ',')) {
       temp.push_back(point);
     }
-    //inserting everything while trying to
+
+    if (temp.size() < 3){
+      continue;
+    }
+    if (temp[1].empty() || temp[2].empty()){
+      continue;
+    }
     string timeStr = getTimeString(temp[1]);
     int year = stoi(timeStr.substr(0, 4));
     int month = stoi(timeStr.substr(4, 2));
     int day = stoi(timeStr.substr(6, 2));
-    int temperature = stoi(temp[2]);
+
+    if (temp[2].empty() || temp[2][0] == 'M'){
+      continue;
+    }
+    float temperature = stof(temp[2]);
     if (year < yearFrom || year > yearTo) {
       continue;
     }
 
     insertTemperatures(temp[0], year, month, day, temperature);
-    allTemps.push_back(averageDaily(temp[0], year, month, day, isCelsius));
+    seenDays.insert({temp[0], year, month, day});
+  }
+  for (auto &[station, year, month, day] : seenDays) {
+    allTemps.push_back(averageDaily(station, year, month, day, isCelsius));
   }
   return allTemps;
 }
