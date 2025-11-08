@@ -51,6 +51,15 @@ class HashMap{
     }
 public:
     HashMap(int size) : table(size, nullptr){} //initialize all elements to nullptr
+    ~HashMap() {
+        for (auto node : table) {
+            while (node) {
+                Node<First, Second>* temp = node;
+                node = node->next;
+                delete temp;
+            }
+        }
+    }
     void insert(First first, Second second){
         int index = hashFunction(first); //hashfunction returns the index
         Node<First, Second>* node = table[index];
@@ -90,7 +99,13 @@ struct NodeTemp{
 class Temperature{
 public:
     NodeTemp* head = nullptr;
-
+    ~Temperature() {
+        while (head) {
+            NodeTemp* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
     void insertTemp(int t){
         NodeTemp* newNode = new NodeTemp(t);
         newNode->next = head;
@@ -114,9 +129,9 @@ public:
 };
 
 string getTimeString(string selectedYear);
-void insertTemperatures(string station, int year, int month, int day, int temp);
-pair<int, float> averageDaily(string station, int year, int month, int day, bool isCelsius);
-vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius);
+void insertTemperatures(string station, int year, int month, int day, int hour, int temp);
+pair<long long, float> averageDaily(string station, int year, int month, int day, bool isCelsius);
+vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius);
 
 
 #endif //HASHMAP_H
