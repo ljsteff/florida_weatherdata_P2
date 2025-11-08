@@ -75,6 +75,9 @@ map<string, map<long long, string>> createMap(const string &metFile){
         while (getline(iss, point, ',')) {
             temp.push_back(point);
         }
+        if(temp.size()< 3){
+          continue;
+        }
         if (map.find(temp[0]) == map.end()) {
             map[temp[0]] = createTinyMap(getTime(temp[1]), temp[2]);
         }
@@ -108,13 +111,16 @@ vector<pair<long long,string>> outputFromMap(map<string, map<long long,string>> 
 vector<pair<long long,string>> averageCalc(vector<pair<long long,string>> input){
   // Takes the average of all the datapoints for each day and leaves it in the pair
     vector<pair<long long,string>> output;
+    if(input.empty()){
+      return output;
+    }
     string store = to_string(input[0].first).substr(0,8);
-    vector<int> temp;
+    vector<long long> temp;
     for (auto it = input.begin(); it != input.end(); it++) {
     	int avg = 0;
     	string day = to_string(it->first).substr(0,8);
     	if (store == day) {
-    		temp.push_back(stoi(it->second));
+    		temp.push_back(stoll(it->second));
      	}
     	else {
     		for (int i = 0 ; i < temp.size(); i++) {
@@ -123,7 +129,7 @@ vector<pair<long long,string>> averageCalc(vector<pair<long long,string>> input)
     	avg /= temp.size();
     	output.push_back(make_pair(stoll(store), to_string(avg)));
 	 	temp.clear();
-    	temp.push_back(stoi(it->second));
+    	temp.push_back(stoll(it->second));
     	store = day;
     	}
 	}
@@ -142,7 +148,7 @@ vector<pair<long long,string>> celsiusCalc(vector<pair<long long,string>> input)
   // Translating all temperture values into Celsius from Fahrenheit
   vector<pair<long long,string>> output;
   for (auto it = input.begin(); it != input.end(); it++) {
-    int newTemp = static_cast<int>((stoi(it->second)-32)*5.0/9.0);
+    int newTemp = static_cast<int>((stoll(it->second)-32)*5.0/9.0);
     pair<long long, string> newPair;
     newPair = make_pair(it->first, to_string(newTemp));
     output.push_back(newPair);
