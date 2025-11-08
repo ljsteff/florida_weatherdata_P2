@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include "hashmap.h"
 using namespace std;
 
 //making each hashmap
@@ -101,12 +102,8 @@ vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yea
   // Skip header
   getline(file,line);
   while(getline(file,line)) {
-    if (line.empty()) {
+    if (line.empty() || line[0] == 'M') {
       continue;
-    }
-    for (int i=0; i < 3; i++) {
-      if (temp[i] == 'M')
-        continue;
     }
     istringstream iss(line);
     string point;
