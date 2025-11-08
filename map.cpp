@@ -75,7 +75,7 @@ map<string, map<long long, string>> createMap(const string &metFile){
         while (getline(iss, point, ',')) {
             temp.push_back(point);
         }
-        if(temp.size()< 3){
+        if(temp[0] == "M" || temp[1] == "M" || temp[2] == "M"){
           continue;
         }
         if (map.find(temp[0]) == map.end()) {
