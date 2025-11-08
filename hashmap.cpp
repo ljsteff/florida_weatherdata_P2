@@ -41,7 +41,7 @@ string getTimeString(string selectedYear) {
 }
 
 //Helper function for inserting everything
-void insertTemperatures(string station, int year, int month, int day, int temp){
+void insertTemperatures(string station, int year, int month, int day, float temp){
   hashYear* yearMap = stations.find(station);
   if (!yearMap){
     stations.insert(station, hashYear(14)); //set tablesize for yearMap to 14 because we have 14 years worth of info
@@ -94,6 +94,7 @@ pair<int, float> averageDaily(string station, int year, int month, int day, bool
 vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius){
   // Parsing logic
   vector<pair<int, float>> allTemps;
+  set<tuple<string, int, int, int>> seenDays;
   ifstream file(metfile);
   string line;
   if(!file.is_open()) {
@@ -112,7 +113,9 @@ vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yea
       temp.push_back(point);
     }
 
-    if (temp.size() < 3) continue; // Skip malformed lines
+    if (temp.size() < 3){
+      continue;
+    }
     if (temp[1].empty() || temp[2].empty()){
       continue;
     }
@@ -124,13 +127,16 @@ vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yea
     if (temp[2].empty() || temp[2][0] == 'M'){
       continue;
     }
-    int temperature = stoi(temp[2]);
+    float temperature = stof(temp[2]);
     if (year < yearFrom || year > yearTo) {
       continue;
     }
 
     insertTemperatures(temp[0], year, month, day, temperature);
-    allTemps.push_back(averageDaily(temp[0], year, month, day, isCelsius));
+    seenDays.insert({temp[0], year, month, day});
+  }
+  for (auto &[station, year, month, day] : seenDays) {
+    allTemps.push_back(averageDaily(station, year, month, day, isCelsius));
   }
   return allTemps;
 }
