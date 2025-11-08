@@ -16,7 +16,6 @@ using hashStation = HashMap<string, hashYear>;
 hashStation stations(113); //there are 113 stations in Florida
 
 
-
 // Helper to get the value of the date/time without dashes or colons:
 string getTimeString(string selectedYear) {
   string year;
