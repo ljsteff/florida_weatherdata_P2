@@ -7,88 +7,6 @@
 #include <utility>
 using namespace std;
 
-//Making a HashMap class with template because I want to make a nested hashmap (4 times)
-template <typename First, typename Second>
-struct Node{
-    First first;
-    Second second;
-    Node* next;
-    Node(First f, Second s): first(f), second(s), next(nullptr){}
-};
-
-template <typename First, typename Second>
-//I hope this works with separate chaining for the innermost hashmap to insert all temperatures per day
-class HashMap{
-    //each station/year/month/day is a separate key
-    vector<Node<First, Second>*> table;
-    int size;
-    int hashFunction(First first){
-      return std::hash<First>{}(first) % size; //I want each index to be a new day
-    }
-    public:
-      HashMap(int size) : table(size, nullptr){} //initialize all elements to nullptr
-      void insert(First first, Second second){
-        int index = hashFunction(first); //hashfunction returns the index
-        Node<First, Second>* node = table[index];
-        while (node != nullptr){
-          if (node->first == first){ //insert value into index using linkedlist
-            node->second = second;
-            return;
-          }
-          node = node->next;
-        }
-        //If first does not exist, create a new node and push it front
-        Node<First, Second>* newnode = new Node<First, Second>(first, second);
-        newnode->next = table[index];
-        table[index] = newnode;
-      }
-      //function to find and return element's second
-      Second* find(First first){
-        int index = hashFunction(first);
-        Node<First, Second>* node = table[index];
-        while (node != nullptr){
-          if (node->first == first){
-            return &node->second;
-          }
-          node = node->next;
-        }
-        return nullptr;
-      }
-};
-
-//Making a special hashmap for temperatures because it should allow duplicate values
-struct NodeTemp{
-    int temp;
-    NodeTemp* next;
-    NodeTemp(int t) : temp(t), next(nullptr){}
-};
-
-class Temperature{
-    public:
-      NodeTemp* head = nullptr;
-
-      void insertTemp(int t){
-        NodeTemp* newNode = new NodeTemp(t);
-        newNode->next = head;
-        head = newNode;
-      }
-
-      float average(){
-        int sum = 0;
-        int count = 0;
-        NodeTemp* curr = head;
-        while (curr != nullptr){
-          sum += curr->temp;
-          count++;
-          curr = curr->next;
-        }
-        if (count == 0){
-          return 0;
-        }
-        return sum/count;
-      }
-};
-
 //making each hashmap
 using hashDay = HashMap<int, Temperature>;
 using hashMonth = HashMap<int, hashDay>;
@@ -166,13 +84,13 @@ pair<int, float> averageDaily(string station, int year, int month, int day, bool
     return {day, 0.0};
   }
   if (!isFahrenheit){
-    return make_pair(day, (temps->average()-32)*5/9);
+    return make_pair(day, (temps->average()-32)*5.0/9.0);
   }
   return make_pair(day, temps->average());
 }
 
 //Front end implementer only has to use this function
-vector<pair<int, float>> weatherMap(const string &metfile, bool isFahrenheit){
+vector<pair<int, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isFahrenheit){
   // Parsing logic
   vector<pair<int, float>> allTemps;
   ifstream file(metfile);
@@ -186,6 +104,10 @@ vector<pair<int, float>> weatherMap(const string &metfile, bool isFahrenheit){
     if (line.empty()) {
       continue;
     }
+    for (int i=0; i < 3; i++) {
+      if (temp[i] == 'M')
+        continue;
+    }
     istringstream iss(line);
     string point;
     vector<string> temp;
@@ -193,8 +115,17 @@ vector<pair<int, float>> weatherMap(const string &metfile, bool isFahrenheit){
       temp.push_back(point);
     }
     //inserting everything while trying to
-    insertTemperatures(temp[0], stoi(getTime(temp[1]).substr(0,4)), stoi(getTime(temp[1]).substr(4,2)), stoi(getTime(temp[1]).substr(6,2)), stoi(temp[2]));
-    allTemps.push_back(averageDaily(temp[0], stoi(getTime(temp[1]).substr(0,4)), stoi(getTime(temp[1]).substr(4,2)), stoi(getTime(temp[1]).substr(6,2)), stoi(temp[2]), isFahrenheit);
+    string timeStr = getTime(temp[1]);
+    int year = stoi(timeStr.substr(0, 4));
+    int month = stoi(timeStr.substr(4, 2));
+    int day = stoi(timeStr.substr(6, 2));
+    int temperature = stoi(temp[2]);
+    if (year < yearFrom || year > yearTo) {
+      continue;
+    }
+
+    insertTemperatures(temp[0], year, month, day, temperature);
+    allTemps.push_back(averageDaily(temp[0], year, month, day, isFahrenheit));
   }
   return allTemps;
 }
