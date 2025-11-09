@@ -124,7 +124,7 @@ pair<long long, float> averageDaily(string station, int year, int month, int day
 //Front end implementer only has to use this function
 vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius, const string& selectedStation){
   //Parsing logic
-  vector<pair<int, float>> allTemps;
+  vector<pair<long long, float>> allTemps;
   set<tuple<string, int, int, int>> seenDays;
 
   ifstream file(metfile);
