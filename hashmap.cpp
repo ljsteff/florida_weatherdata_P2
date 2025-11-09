@@ -19,32 +19,30 @@ hashStation stations(113); //there are 113 stations in Florida
 
 // Helper to get the value of the date/time without dashes or colons:
 string getTimeString(string selectedYear) {
-  string year;
-  istringstream in(selectedYear);
+    string year, month, day, hour, minute;
+    istringstream in(selectedYear);
 
-  getline(in, year, '-');
+    getline(in, year, '-');
+    getline(in, month, '-');
+    getline(in, day, ' ');
 
-  string month;
-  getline(in, month, '-');
+    getline(in, hour, ':');
+    getline(in, minute);
 
-  string day;
-  getline(in, day, ' ');
+    // Pad month, day, hour, minute with leading zeros if needed
+    if (month.length() == 1) month = "0" + month;
+    if (day.length() == 1) day = "0" + day;
+    if (hour.length() == 1) hour = "0" + hour;
+    if (minute.length() == 1) minute = "0" + minute;
 
-  string hour;
-  getline(in, hour, ':');
-
-  string minute;
-  getline(in, minute);
-
-  string finalTime = year + month + day + hour + minute;
-  return finalTime;
+    return year + month + day + hour + minute;
 }
 
 //Helper function for inserting everything
 void insertTemperatures(string station, int year, int month, int day, float temp){
   hashYear* yearMap = stations.find(station);
   if (!yearMap){
-    stations.insert(station, hashYear(14)); //set tablesize for yearMap to 14 because we have 14 years worth of info
+    stations.insert(station, hashYear(16)); //set tablesize for yearMap to 14 because we have 14 years worth of info
     yearMap = stations.find(station);
   }
   hashMonth* monthMap = yearMap->find(year);
@@ -77,11 +75,13 @@ void insertTemperatures(string station, int year, int month, int day, float temp
 
 pair<long long, float> averageDaily(string station, int year, int month, int day, bool isCelsius){
   hashYear* yearMap = stations.find(station);
-  string yr = to_string(year);
-  string mm = to_string(month);
-  string dd = to_string(day);
+//  string yr = to_string(year);
+//  string mm = to_string(month);
+//  string dd = to_string(day);
 
-  long long x = stoll(yr + mm + dd);
+  char buffer[9];
+  sprintf(buffer, "%04d%02d%02d", year, month, day);
+  long long x = stoll(buffer);
 
   if (!yearMap){
     return {x, 0.0};

@@ -91,9 +91,9 @@ public:
 
 //Making a special hashmap for temperatures because it should allow duplicate values
 struct NodeTemp{
-    int temp;
+    float temp;
     NodeTemp* next;
-    NodeTemp(int t) : temp(t), next(nullptr){}
+    NodeTemp(float t) : temp(t), next(nullptr){}
 };
 
 class Temperature{
@@ -106,7 +106,7 @@ public:
             delete temp;
         }
     }
-    void insertTemp(int t){
+    void insertTemp(float t){
         NodeTemp* newNode = new NodeTemp(t);
         newNode->next = head;
         head = newNode;
@@ -129,7 +129,7 @@ public:
 };
 
 string getTimeString(string selectedYear);
-void insertTemperatures(string station, int year, int month, int day, int temp);
+void insertTemperatures(string station, int year, int month, int day, float temp);
 pair<long long, float> averageDaily(string station, int year, int month, int day, bool isCelsius);
 vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius, const string& selectedStation);
 
