@@ -66,6 +66,7 @@ public:
         Node<First, Second>* node = table[index];
         while (node != nullptr){
             if (node->first == first){
+                node->second = second;
                 return;
             }
             node = node->next;
@@ -112,8 +113,8 @@ public:
     }
 
     float average(){
-        int sum = 0;
-        int count = 0;
+        float sum = 0.0;
+        float count = 0.0;
         NodeTemp* curr = head;
         while (curr != nullptr){
             sum += curr->temp;

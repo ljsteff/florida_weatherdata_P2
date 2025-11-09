@@ -10,8 +10,7 @@
 using namespace std;
 
 //making each hashmap
-using hashHour = HashMap<int, float>;
-using hashDay = HashMap<int, hashHour>;
+using hashDay = HashMap<int, Temperature>;
 using hashMonth = HashMap<int, hashDay>;
 using hashYear = HashMap<int, hashMonth>;
 using hashStation = HashMap<string, hashYear>;
@@ -59,20 +58,20 @@ void insertTemperatures(string station, int year, int month, int day, int hour, 
     dayMap = monthMap->find(month);
   }
 
-//  Temperature* temps = dayMap->find(day);
-//  if (temps == nullptr){
-//    dayMap->insert(day, Temperature());
-//    temps = dayMap->find(day);
-//  }
+  Temperature* temps = dayMap->find(day);
+  if (temps == nullptr){
+    dayMap->insert(day, Temperature());
+    temps = dayMap->find(day);
+  }
 
-  hashHour* hourMap = dayMap->find(day);
-    if (!hourMap){
-        dayMap->insert(day, hashHour(24));
-        hourMap = dayMap->find(day);
-    }
+//  hashHour* hourMap = dayMap->find(day);
+//    if (!hourMap){
+//        dayMap->insert(day, hashHour(24));
+//        hourMap = dayMap->find(day);
+//    }
 
-  hourMap->insert(hour, temp);
-  //temps->insertTemp(temp);
+//  hourMap->insert(hour, temp);
+  temps->insertTemp(temp);
 }
 
 
@@ -99,22 +98,8 @@ pair<long long, float> averageDaily(string station, int year, int month, int day
   if (!hourMap){
     return {x, 0.0};
   }
-  float sum = 0.0;
-  float count = 0.0;
-  for (int i = 0; i < 24; ++i){
-    float* temp = hourMap->find(i);
-    if (temp){
-        sum += *temp;
-        count++;
-    }
-  }
-  float avg;
-  if (count != 0){
-    avg = sum/count;
-  }
-  else{
-    avg = 0.0;
-  }
+
+  float avg = temps->average();
   if (isCelsius){
       avg = (avg - 32.0f) * 5.0f / 9.0f;
   }
@@ -158,14 +143,13 @@ vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, i
     int year = stoi(timeStr.substr(0, 4));
     int month = stoi(timeStr.substr(4, 2));
     int day = stoi(timeStr.substr(6, 2));
-    int hour = stoi(timeStr.substr(8, 2));
 
     float temperature = stof(temp[2]);
     if (year < yearFrom || year > yearTo) {
       continue;
     }
 
-    insertTemperatures(temp[0], year, month, day, hour, temperature);
+    insertTemperatures(temp[0], year, month, day, temperature);
     seenDays.insert({temp[0], year, month, day});
   }
   for (auto &[station, year, month, day] : seenDays) {
