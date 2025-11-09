@@ -99,8 +99,8 @@ pair<long long, float> averageDaily(string station, int year, int month, int day
   if (!hourMap){
     return {x, 0.0};
   }
-  float sum = 0;
-  int count = 0;
+  float sum = 0.0;
+  float count = 0.0;
   for (int i = 0; i < 24; ++i){
     float* temp = hourMap->find(i);
     if (temp){
@@ -116,7 +116,7 @@ pair<long long, float> averageDaily(string station, int year, int month, int day
     avg = 0.0;
   }
   if (isCelsius){
-      avg = (avg - 32) * 5.0 / 9.0;
+      avg = (avg - 32.0f) * 5.0f / 9.0f;
   }
   return {x, avg};
 }

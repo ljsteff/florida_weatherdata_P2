@@ -62,16 +62,14 @@ public:
         }
     }
     void insert(First first, Second second){
-        int index = hashFunction(first); //hashfunction returns the index
+        int index = hashFunction(first);
         Node<First, Second>* node = table[index];
         while (node != nullptr){
-            if (node->first == first){ //insert value into index using linkedlist
-                node->second = second;
+            if (node->first == first){
                 return;
             }
             node = node->next;
         }
-        //If first does not exist, create a new node and push it front
         Node<First, Second>* newnode = new Node<First, Second>(first, second);
         newnode->next = table[index];
         table[index] = newnode;
