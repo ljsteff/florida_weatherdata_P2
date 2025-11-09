@@ -1,13 +1,20 @@
+
+
 #include "front_end.h"
-// #include <chrono>
+#include "map.h"
+#include <chrono>
 #include <optional>
 #include <SFML/Window/Event.hpp>
 #include <set>
+#include <sstream>
+#include <fstream>
+#include "hashmap.h"
+
 // make sure to place vsc within cmake-build-debug folder, rn it just reads GNV.csv
 FrontEnd front;
 
 // set of all the station names to compare to input
-set<string> stations = {"AAF", "BCT", "BKV", "BOW", "F95", "FIN", "CEW", "XMR", "VSH", "NFJ","CLW",
+set<string> stationsList = {"AAF", "BCT", "BKV", "BOW", "F95", "FIN", "CEW", "XMR", "VSH", "NFJ","CLW",
 "2IS", "54A", "CTY", "CGC", "DAB", "egi", "54J", "DED", "DTS","VPS", "EGC", "FXE", "FMY", "RSW",
 "RSW", "FPR", "FHB", "FLL", "GNV", "HWO", "HST", "HRT", "IMM", "INF", "NIP", "CRG", "VQQ", "HEG", "NEN",
 "JAX", "NQX", "ISM", "K70","EYW", "42J", "LAL", "LEE", "LCQ", "X07", "LNA", "24J", "MCF", "MAI", "NRB",
@@ -16,6 +23,8 @@ set<string> stations = {"AAF", "BCT", "BKV", "BOW", "F95", "FIN", "CEW", "XMR", 
 "2J9", "PIE", "SFB", "SRQ", "SGJ", "SEF", "SPG", "TLH", "TPA", "TIX", "PAM", "TPF", "VVG", "X21", "1J0", "BCR",
 "VDF", "X59", "X26", "VNC", "VRB", "PBI", "NSE", "GIF", "SUA", "F45", "X60", "ZPH"};
 
+
+// Utilized this for much of the SFML content https://github.com/SFML/SFML.git
 string stationInput;
 int main() {
     // it took me 10 minutes to figure out why the size was giving an error (it wanted {} :(    )
@@ -28,18 +37,26 @@ int main() {
     LoadFont(font, "Fonts/G_ari_bd.ttf");
     // clock text object, displayed as font above ^
     sf::Text clock(font);
-    // sf::Clock clockTimer;
+    sf::Clock mapClock;
+    sf::Clock hashmapClock;
+    clock.setCharacterSize(50);
+    clock.setFillColor(sf::Color(150, 50, 150));
+    clock.setOutlineColor(sf::Color::Black);
+    clock.setOutlineThickness(2);
+    auto clockSize = clock.getLocalBounds().size;
+    clock.setOrigin({clockSize.x, clockSize.y});
+    clock.setPosition(sf::Vector2f(front.width / 4.f, front.height / 1.2f));
 
     // Title text
-    sf::Text title(font);
-    title.setString("Temperature Increase Mapping");
-    title.setCharacterSize(90);
-    title.setFillColor(sf::Color(0, 28, 127));
-    title.setOutlineColor(sf::Color::Black);
-    title.setOutlineThickness(2);
-    auto titleSize = title.getLocalBounds().size;
-    title.setOrigin({titleSize.x / 2.f, titleSize.y / 2.f});
-    title.setPosition(sf::Vector2f(front.width / 2.f, 50.f));
+    sf::Text titleLetters(font);
+    titleLetters.setString("Temperature Increase Mapping");
+    titleLetters.setCharacterSize(90);
+    titleLetters.setFillColor(sf::Color(0, 28, 127));
+    titleLetters.setOutlineColor(sf::Color::Black);
+    titleLetters.setOutlineThickness(2);
+    auto titleSize = titleLetters.getLocalBounds().size;
+    titleLetters.setOrigin({titleSize.x / 2.f, titleSize.y / 2.f});
+    titleLetters.setPosition(sf::Vector2f(front.width / 2.f, 50.f));
 
     // Input station text
     sf::Text station(font);
@@ -103,7 +120,6 @@ int main() {
     auto foundSize = found.getLocalBounds().size;
     found.setOrigin({foundSize.x, foundSize.y});
     found.setPosition(sf::Vector2f(front.width / 2.33f, front.height / 2.7f));
-
 
     // Date specifics begin
     sf::Text oneYear(font);
@@ -234,22 +250,89 @@ int main() {
     unitsBoxC.setOrigin({unitsBoxCSize.x, unitsBoxCSize.y});
     unitsBoxC.setPosition(sf::Vector2f(front.width / 2.3f, front.height / 2.15f));
 
+    sf::RectangleShape goButtonBox(sf::Vector2f(150, 50));
+    goButtonBox.setFillColor(sf::Color::Transparent);
+    goButtonBox.setOutlineColor(sf::Color::Black);
+    goButtonBox.setOutlineThickness(2);
+    auto goButtonBoxSize = goButtonBox.getLocalBounds().size;
+    goButtonBox.setOrigin({goButtonBoxSize.x, goButtonBoxSize.y});
+    goButtonBox.setPosition(sf::Vector2f(front.width / 1.75f, front.height / 1.4f));
 
+    sf::Text goButton(font);
+    goButton.setString("Go!");
+    goButton.setCharacterSize(45);
+    goButton.setFillColor(sf::Color(20, 188, 50));
+    goButton.setOutlineColor(sf::Color::Black);
+    goButton.setOutlineThickness(2);
+    auto goButtonSize = goButton.getLocalBounds().size;
+    goButton.setOrigin({goButtonSize.x, goButtonSize.y});
+    goButton.setPosition(sf::Vector2f(front.width / 1.85f, front.height / 1.45f));
 
-    // c for celsius,
+    sf::Text mapText(font);
+    mapText.setString("Map");
+    mapText.setCharacterSize(45);
+    mapText.setFillColor(sf::Color(200, 88, 88));
+    mapText.setOutlineColor(sf::Color::Black);
+    mapText.setOutlineThickness(2);
+    auto mapTextSize = mapText.getLocalBounds().size;
+    mapText.setOrigin({mapTextSize.x, mapTextSize.y});
+    mapText.setPosition(sf::Vector2f(front.width / 2.39f, front.height / 1.75f));
+
+    sf::Text hashmapText(font);
+    hashmapText.setString("Hashmap");
+    hashmapText.setCharacterSize(30);
+    hashmapText.setFillColor(sf::Color(200, 88, 88));
+    hashmapText.setOutlineColor(sf::Color::Black);
+    hashmapText.setOutlineThickness(2);
+    auto hashmapTextSize = hashmapText.getLocalBounds().size;
+    hashmapText.setOrigin({hashmapTextSize.x, hashmapTextSize.y});
+    hashmapText.setPosition(sf::Vector2f(front.width / 3.15f, front.height / 1.75f));
+
+    sf::Text DS(font);
+    DS.setString("DS: ");
+    DS.setCharacterSize(50);
+    DS.setFillColor(sf::Color(0, 88, 187));
+    DS.setOutlineColor(sf::Color::Black);
+    DS.setOutlineThickness(2);
+    auto DSSize = DS.getLocalBounds().size;
+    DS.setOrigin({DSSize.x, DSSize.y});
+    DS.setPosition(sf::Vector2f(front.width / 5.4f, front.height / 1.78f));
+
+    sf::RectangleShape mapTextBox(sf::Vector2f(150, 50));
+    mapTextBox.setFillColor(sf::Color::Transparent);
+    mapTextBox.setOutlineColor(sf::Color::Black);
+    mapTextBox.setOutlineThickness(2);
+    auto mapTextBoxSize = mapTextBox.getLocalBounds().size;
+    mapTextBox.setOrigin({mapTextBoxSize.x, mapTextBoxSize.y});
+    mapTextBox.setPosition(sf::Vector2f(front.width / 3.1f, front.height / 1.7f));
+
+    sf::RectangleShape hashmapTextBox(sf::Vector2f(150, 50));
+    hashmapTextBox.setFillColor(sf::Color::Transparent);
+    hashmapTextBox.setOutlineColor(sf::Color::Black);
+    hashmapTextBox.setOutlineThickness(2);
+    auto hashmapTextBoxSize = hashmapTextBox.getLocalBounds().size;
+    hashmapTextBox.setOrigin({hashmapTextBoxSize.x, hashmapTextBoxSize.y});
+    hashmapTextBox.setPosition(sf::Vector2f(front.width / 2.3f, front.height / 1.7f));
+
+    // c for celsius
     bool c = false;
     bool want2type = false;
     bool notFoundBool = false;
     bool foundBool = false;
     int year = 0;
+    bool mapButtonBool = false;
+    bool hashmapButtonBool = false;
+    long long startYear = 0;
+    long long endYear = 2025;
 
     while (window.isOpen()) {
-
         // lets you exit program by clicking x in the top right
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
             }
+
+            // UNIT BOX CLICK REGISTRY START
             if (event->is<sf::Event::MouseButtonPressed>()) {
                 const auto& mouseButton = event->getIf<sf::Event::MouseButtonPressed>();
                 sf::Vector2f mousePress(static_cast<float>(mouseButton->position.x), static_cast<float>(mouseButton->position.y));
@@ -267,12 +350,9 @@ int main() {
                     unitsBoxF.setOutlineColor(sf::Color::Black);
                     unitsBoxF.setOutlineThickness(2);
                 }
-            }
-            if (event->is<sf::Event::MouseButtonPressed>()) {
-                const auto& mouseButton = event->getIf<sf::Event::MouseButtonPressed>();
-                sf::Vector2f mousePress(static_cast<float>(mouseButton->position.x), static_cast<float>(mouseButton->position.y));
+                // UNIT BOX CLICK REGISTRY END
 
-                // if the textbox is clicked by the mouse, indicates user wants to type in the box, set to true
+                // YEAR BOX START
                 if (oneYearBox.getGlobalBounds().contains(mousePress)) {
                     year = 1;
                     oneYearBox.setOutlineColor(sf::Color(0, 200, 0));
@@ -317,61 +397,171 @@ int main() {
                     tenYearBox.setOutlineThickness(2);
                     fifteenYearBox.setOutlineColor(sf::Color(0, 200, 0));
                     fifteenYearBox.setOutlineThickness(4);
-
                 }
-            }
 
-            // Typing in station textbox start
-            if (event->is<sf::Event::MouseButtonPressed>()) {
-                const auto& mouseButton = event->getIf<sf::Event::MouseButtonPressed>();
-                sf::Vector2f mousePress(static_cast<float>(mouseButton->position.x), static_cast<float>(mouseButton->position.y));
-
-                // if the textbox is clicked by the mouse, indicates user wants to type in the box, set to true
+                // YEAR BOX END
+                // TEXTBOX BOOL START
                 if (textBox.getGlobalBounds().contains(mousePress)) {
                     want2type = true;
                 }
+                //TEXTBOX BOOL END
+
+                // MAP & HASHMAP BOX START
+                if (mapTextBox.getGlobalBounds().contains(mousePress)) {
+                    mapButtonBool = true;
+                    hashmapButtonBool = false;
+                    mapTextBox.setOutlineColor(sf::Color(0, 200, 0));
+                    mapTextBox.setOutlineThickness(4);
+                    hashmapTextBox.setOutlineColor(sf::Color::Black);
+                    hashmapTextBox.setOutlineThickness(2);
+
+                }
+                if (hashmapTextBox.getGlobalBounds().contains(mousePress)) {
+                    hashmapButtonBool = true;
+                    mapButtonBool = false;
+                    hashmapTextBox.setOutlineColor(sf::Color(0, 200, 0));
+                    hashmapTextBox.setOutlineThickness(4);
+                    mapTextBox.setOutlineColor(sf::Color::Black);
+                    mapTextBox.setOutlineThickness(2);
+
+                }
+                // MAP AND HASHMAP BOX END
+
+                // GO BUTTON & IMPLEMENTATION START
+                if (foundBool == true && year != 0 && goButtonBox.getGlobalBounds().contains(mousePress)) {
+                    goButtonBox.setOutlineColor(sf::Color(0, 200, 0));
+                    goButtonBox.setOutlineThickness(4);
+                    // MAP IMPLEMENTATION START
+                    if (hashmapButtonBool == true && mapButtonBool == false) {
+                        hashmapClock.restart();
+                        vector<pair<long long,string>> result;
+                        vector<pair<long long,string>> resultCelsius;
+                        map<string, map<long long,string>> createdMap;
+                        vector<pair<long long,string>> resultFahrenheit;
+
+                        createdMap = createMap("15YearStations.csv");
+
+                        if (year == 1) {
+                            startYear = 202411010053;
+                            endYear = 202511010053;
+                        }if (year == 5) {
+                            startYear = 202011010053;
+                            endYear = 202511010053;
+                        }if (year == 10) {
+                            startYear = 201511010053;
+                            endYear = 202511010053;
+                        }if (year == 15) {
+                            startYear = 201011010053;
+                            endYear = 202511010053;
+                        }
+
+                        resultFahrenheit = outputFromMap(createdMap, startYear, endYear, stationInput);
+                        result = averageCalc(resultFahrenheit);
+                        // celsius
+                        if (c == true) {
+                            result = celsiusCalc(result);
+                            for (const auto& [date, temp] : result) {
+                                string dateString = to_string(date);
+                                cout << dateString << " ";
+                                cout << setprecision(4);
+                                cout << temp << "C" << endl;
+                            }
+                        }
+                        // fahrenheit
+                        if (c == false) {
+                            for (const auto& [date, temp] : result) {
+                                string dateString = to_string(date);
+                                cout << dateString << " ";
+                                cout << setprecision(4);
+                                cout << temp << "F" << endl;
+                            }
+                        }
+                        sf::Time hashmapTime = hashmapClock.getElapsedTime();
+                        stringstream ss;
+                        ss << "Map Time : " << hashmapTime.asSeconds() << " seconds";
+                        clock.setString(ss.str());
+                    }
+                    // MAP IMPLEMENTATION END
+
+                    // HASHMAP IMPLEMENTATION START
+                    if (mapButtonBool == true && hashmapButtonBool == false) {
+                        mapClock.restart();
+                        vector<pair<long long, float>> hashMap;
+                        if (year == 1) {
+                            int tempYear = 2024;
+                            hashMap = weatherMap("15YearStations.csv", tempYear, 2025, c, stationInput);
+                        }
+                        if (year == 5) {
+                            int tempYear = 2020;
+                            hashMap = weatherMap("15YearStations.csv", tempYear, 2025, c, stationInput);
+                        }
+                        if (year == 10) {
+                            int tempYear = 2015;
+                            hashMap = weatherMap("15YearStations.csv", tempYear, 2025, c, stationInput);
+                        }
+                        if (year == 15) {
+                            int tempYear = 2010;
+                            hashMap = weatherMap("15YearStations.csv", tempYear, 2025, c, stationInput);
+                        }
+
+                        for (const auto& f : hashMap) {
+                            if (c == true) {
+                                cout << f.first << " " << setprecision(4) << f.second << "C" << endl;
+                            }
+                            if (c == false) {
+                                cout << f.first << " " << setprecision(4) <<  f.second << "F" << endl;
+                            }
+                        }
+                        sf::Time hashmapTime = hashmapClock.getElapsedTime();
+                        stringstream ss;
+                        ss << "Hashmap Time : " << hashmapTime.asSeconds() << " seconds";
+                        clock.setString(ss.str());
+                    }
+                    // HASHMAP IMPLEMENTATION END
+                }
+                // GO BUTTON END
             }
 
+            // TYPING IN STATION TEXTBOX START
             if (event->is<sf::Event::TextEntered>() && want2type == true) {
                 const auto& stationSelect = event->getIf<sf::Event::TextEntered>();
-                    char input = static_cast<char>(stationSelect->unicode);
+                char input = static_cast<char>(stationSelect->unicode);
                 // if backspace
-                    if (input == '\b') {
-                        // if it's not empty, deletes most recent
-                        if (!stationInput.empty()) {
-                            stationInput.pop_back();
-                        }
-                    }else if (isdigit(input) && !isspace(input) && stationInput.size() < 4){
-                    stationInput.push_back(input);
-                    }else if(!isdigit(input) && !isspace(input) && stationInput.size() < 4) {
-                        stationInput.push_back(toupper(input));
+                if (input == '\b') {
+                    // if it's not empty, deletes most recent
+                    if (!stationInput.empty()) {
+                        stationInput.pop_back();
                     }
+                }else if (isdigit(input) && !isspace(input) && stationInput.size() < 4){
+                    stationInput.push_back(input);
+                }else if(!isdigit(input) && !isspace(input) && stationInput.size() < 4) {
+                    stationInput.push_back(toupper(input));
+                }
                 stationText.setString(stationInput);
                 if (stationInput.empty()) {
                     notFoundBool = false;
                     foundBool = false;
                 }
-                }
+            }
 
-        if (const auto* enter = event->getIf<sf::Event::KeyPressed>() ) {
-            if (enter->code == sf::Keyboard::Key::Enter) {
-                if (stations.find(stationInput) != stations.end()) {
-                    front.station = stationInput;
-                    notFoundBool = false;
-                     foundBool = true;
-                }else {
-                    notFoundBool = true;
-                    foundBool = false;
+            if (const auto* enter = event->getIf<sf::Event::KeyPressed>() ) {
+                if (enter->code == sf::Keyboard::Key::Enter) {
+                    if (stationsList.find(stationInput) != stationsList.end()) {
+                        front.station = stationInput;
+                        notFoundBool = false;
+                        foundBool = true;
+                    }else {
+                        notFoundBool = true;
+                        foundBool = false;
+                    }
                 }
             }
+            // TYPING IN TEXTBOX END
         }
-            // typing in station textbox end
-        }
-
-        // making things display/appear
+        // WINDOW DISPLAY
         window.clear(background);
         window.draw(clock);
-        window.draw(title);
+        window.draw(titleLetters);
         window.draw(station);
         window.draw(textBox);
         window.draw(stationText);
@@ -390,15 +580,23 @@ int main() {
         window.draw(fahrenheit);
         window.draw(unitsBoxC);
         window.draw(celsius);
+        window.draw(mapTextBox);
+        window.draw(mapText);
+        window.draw(hashmapText);
+        window.draw(hashmapTextBox);
+        window.draw(clock);
+        window.draw(DS);
+
         if (notFoundBool) {
             window.draw(notFound);
         }
         if (foundBool) {
             window.draw(found);
         }
+        if (foundBool == true && year != 0 && (hashmapButtonBool == true || mapButtonBool == true)) {
+            window.draw(goButton);
+            window.draw(goButtonBox);
+        }
         window.display();
     }
-
-    getStation(stationInput);
-    cout << front.station << endl;
 }
