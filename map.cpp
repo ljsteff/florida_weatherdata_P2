@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include "map.h"
 using namespace std;
 
 // Should be a function that takes in the dates desired by the user and returns the two temp values.
@@ -55,7 +56,7 @@ map<string, map<long long, string>> createMap(const string &metFile){
         // The key to that inside map is a string that designates the specific time of the data point.
         // The value to that inside map is a string, with the rest of the data from the line.
 
-    map<string, map<long long,string>> map;
+    map<string, map<long long,string>> mapData;
 
     // Parsing logic
     ifstream file(metFile);
@@ -78,14 +79,14 @@ map<string, map<long long, string>> createMap(const string &metFile){
         if(temp[0] == "M" || temp[1] == "M" || temp[2] == "M"){
           continue;
         }
-        if (map.find(temp[0]) == map.end()) {
-            map[temp[0]] = createTinyMap(getTime(temp[1]), temp[2]);
+        if (mapData.find(temp[0]) == mapData.end()) {
+            mapData[temp[0]] = createTinyMap(getTime(temp[1]), temp[2]);
         }
-        else if (map.find(temp[0]) != map.end()) {
-            updateTinyMap(map[temp[0]], getTime(temp[1]), temp[2]);
+        else if (mapData.find(temp[0]) != mapData.end()) {
+            updateTinyMap(mapData[temp[0]], getTime(temp[1]), temp[2]);
         }
     }
-    return map;
+    return mapData;
 }
 
 // Input will be the result of the map from the previous function and a range of years?
@@ -145,10 +146,10 @@ vector<pair<long long,string>> averageCalc(vector<pair<long long,string>> input)
 }
 
 vector<pair<long long,string>> celsiusCalc(vector<pair<long long,string>> input){
-  // Translating all temperture values into Celsius from Fahrenheit
+  // Translating all temperature values into Celsius from Fahrenheit
   vector<pair<long long,string>> output;
   for (auto it = input.begin(); it != input.end(); it++) {
-    int newTemp = static_cast<int>((stoll(it->second)-32)*5.0/9.0);
+    float newTemp = (stof(it->second)-32.0f)*5.0f/9.0f;
     pair<long long, string> newPair;
     newPair = make_pair(it->first, to_string(newTemp));
     output.push_back(newPair);
