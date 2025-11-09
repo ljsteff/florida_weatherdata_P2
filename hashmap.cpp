@@ -41,7 +41,7 @@ string getTimeString(string selectedYear) {
 }
 
 //Helper function for inserting everything
-void insertTemperatures(string station, int year, int month, int day, int hour, float temp){
+void insertTemperatures(string station, int year, int month, int day, float temp){
   hashYear* yearMap = stations.find(station);
   if (!yearMap){
     stations.insert(station, hashYear(14)); //set tablesize for yearMap to 14 because we have 14 years worth of info
