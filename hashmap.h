@@ -129,7 +129,7 @@ public:
 };
 
 string getTimeString(string selectedYear);
-void insertTemperatures(string station, int year, int month, int day, int hour, int temp);
+void insertTemperatures(string station, int year, int month, int day, int temp);
 pair<long long, float> averageDaily(string station, int year, int month, int day, bool isCelsius);
 vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius, const string& selectedStation);
 

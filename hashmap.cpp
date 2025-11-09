@@ -94,11 +94,10 @@ pair<long long, float> averageDaily(string station, int year, int month, int day
   if (!dayMap){
     return {x, 0.0};
   }
-  hashHour* hourMap = dayMap->find(day);
-  if (!hourMap){
+  Temperature* temps = dayMap->find(day);
+  if (!temps){
     return {x, 0.0};
   }
-
   float avg = temps->average();
   if (isCelsius){
       avg = (avg - 32.0f) * 5.0f / 9.0f;
