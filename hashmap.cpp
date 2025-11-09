@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <set>
 #include "hashmap.h"
 using namespace std;
 
@@ -121,10 +122,11 @@ pair<long long, float> averageDaily(string station, int year, int month, int day
 }
 
 //Front end implementer only has to use this function
-vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius){
+vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, int yearTo, bool isCelsius, const string& selectedStation){
   //Parsing logic
   vector<pair<int, float>> allTemps;
   set<tuple<string, int, int, int>> seenDays;
+
   ifstream file(metfile);
   string line;
   if(!file.is_open()) {
@@ -149,6 +151,9 @@ vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, i
     if (temp[1].empty() || temp[2].empty() || temp[2][0] == 'M'){
       continue;
     }
+    if (temp[0] != selectedStation){
+      continue;
+    }
     string timeStr = getTimeString(temp[1]);
     int year = stoi(timeStr.substr(0, 4));
     int month = stoi(timeStr.substr(4, 2));
@@ -164,7 +169,7 @@ vector<pair<long long, float>> weatherMap(const string &metfile, int yearFrom, i
     seenDays.insert({temp[0], year, month, day});
   }
   for (auto &[station, year, month, day] : seenDays) {
-    allTemps.push_back(averageDaily(station, year, month, day, hour, isCelsius));
+    allTemps.push_back(averageDaily(station, year, month, day, isCelsius));
   }
   return allTemps;
 }
