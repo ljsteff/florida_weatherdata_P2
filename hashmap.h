@@ -51,7 +51,7 @@ class HashMap{
         }
     }
 public:
-    HashMap(int size) : table(size, nullptr){} //initialize all elements to nullptr
+    HashMap(int s) : table(size, nullptr), size(s){} //initialize all elements to nullptr
     ~HashMap() {
         for (auto node : table) {
             while (node) {
